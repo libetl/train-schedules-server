@@ -4,7 +4,7 @@ module.exports = {
     entry: './trainSchedulesServer.js',
     target: 'node',
     output: {
-      filename: 'bin/trainScheduleServer.js'
+      filename: 'bin/trainSchedulesServer.js'
     },
     plugins: [
       new UglifyJsPlugin()
