@@ -2,7 +2,7 @@
   "name": "trainschedulesserver",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "bin/trainSchedulesServer.js",
   "scripts": {
     "build": "webpack"
   },
