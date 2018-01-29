@@ -5,6 +5,7 @@
   "main": "bin/trainSchedulesServer.js",
   "scripts": {
     "build": "webpack"
+    "start": "./trainSchedulesServer.js"
   },
   "dependencies": {
     "axios": "latest",
