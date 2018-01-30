@@ -25,7 +25,7 @@ app.get('/coords/:coords', ({params:{coords}}, res) => {
         {lat: parseFloat(stopPoints[0].stop_lat), long: parseFloat(stopPoints[0].stop_lon)})
     res.set('Content-Type', 'application/json')
     res.send({departures: asDeparturesData(timetable({gtfs, stopPoints,
-        date, time})), stationName: stopPoints[0].stop_name, date, time, distanceKilometers})})
+        date, time})), stationName: (stopPoints[0]||{}).stop_name || 'no station nearby', date, time, distanceKilometers})})
 
 app.get('/coords/:coords/date/:date', ({params:{coords, date}}, res) => {
     const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
