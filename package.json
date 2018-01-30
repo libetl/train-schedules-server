@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "axios": "latest",
+    "bfj": "latest",
     "yauzl": "latest",
     "event-stream": "latest",
     "express": "latest",

@@ -4,6 +4,7 @@ const {nearestTo, timetable, asDeparturesData} = require('./timetable')
 const moment = require('moment')
 const express = require('express')
 const fs = require('fs')
+const bfj = require('bfj')
 
 const sources = [
     'https://ressources.data.sncf.com/explore/dataset/sncf-ter-gtfs/files/24e02fa969496e2caa5863a365c66ec2/download/',
@@ -14,13 +15,13 @@ const gtfs = {}
 const app = express()
 
 const update = () => readDumps(sources)
-    .then(updatedGtfs => new Promise(resolve =>
-        Object.assign(gtfs, updatedGtfs, {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}) &&
-        fs.writeFile('./savedGtfs.dump', JSON.stringify(gtfs), resolve)))
+    .then(updatedGtfs => Object.assign(gtfs, updatedGtfs, {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}) &&
+        bfj.write('./savedGtfs.dump', gtfs))
 
-const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(
-    resolve => fs.readFile('./savedGtfs.dump', (err, data) =>
-        err ? resolve() : Object.assign(gtfs, JSON.parse(data)) && resolve(data)))
+const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(resolve =>
+    fs.stat('./savedGtfs.dump', (err => err ? resolve({}) :
+        fs.readFile('./savedGtfs.dump', 'utf8', (err, data) => resolve(Object.assign(gtfs, JSON.parse(data)))))))
+
 
 const workWith = ({res, gtfs, coords, date, time}) => wakeUpDumpIfNecessary(gtfs).then(() => {
     const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
