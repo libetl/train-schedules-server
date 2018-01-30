@@ -19,8 +19,8 @@ const update = () => readDumps(sources)
         fs.writeFile('./savedGtfs.dump', JSON.stringify(gtfs), resolve)))
 
 const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(
-    (resolve, reject) => fs.readFile('./savedGtfs.dump', (err, data) =>
-        err ? reject() : Object.assign(gtfs, JSON.parse(data)) && resolve(data)))
+    resolve => fs.readFile('./savedGtfs.dump', (err, data) =>
+        err ? resolve() : Object.assign(gtfs, JSON.parse(data)) && resolve(data)))
 
 const workWith = ({res, gtfs, coords, date, time}) => wakeUpDumpIfNecessary(gtfs).then(() => {
     const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
