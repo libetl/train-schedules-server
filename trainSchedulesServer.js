@@ -3,6 +3,7 @@ const haversine = require('./haversine')
 const {nearestTo, timetable, asDeparturesData} = require('./timetable')
 const moment = require('moment')
 const express = require('express')
+const fs = require('fs')
 
 const sources = [
     'https://ressources.data.sncf.com/explore/dataset/sncf-ter-gtfs/files/24e02fa969496e2caa5863a365c66ec2/download/',
@@ -13,37 +14,31 @@ const gtfs = {}
 const app = express()
 
 const update = () => readDumps(sources)
-    .then(updatedGtfs => Object.assign(gtfs, updatedGtfs,
-            {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}))
+    .then(updatedGtfs => new Promise(resolve =>
+        Object.assign(gtfs, updatedGtfs, {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}) &&
+        fs.writeFile('./savedGtfs.dump', JSON.stringify(gtfs), resolve)))
 
-app.get('/coords/:coords', ({params:{coords}}, res) => {
-    const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
-    const stopPoints = nearestTo(coordinates, gtfs)
-    const date = moment().format('YYYYMMDD')
-    const time = moment().format('HH:mm:ss')
-    const distanceKilometers = stopPoints[0] && haversine(coordinates,
-        {lat: parseFloat(stopPoints[0].stop_lat), long: parseFloat(stopPoints[0].stop_lon)})
-    res.set('Content-Type', 'application/json')
-    res.send({departures: asDeparturesData(timetable({gtfs, stopPoints,
-        date, time})), stationName: (stopPoints[0]||{}).stop_name || 'no station nearby', date, time, distanceKilometers})})
+const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(
+    (resolve, reject) => fs.readFile('./savedGtfs.dump', (err, data) =>
+        err ? reject() : Object.assign(gtfs, JSON.parse(data)) && resolve(data)))
 
-app.get('/coords/:coords/date/:date', ({params:{coords, date}}, res) => {
+const workWith = ({res, gtfs, coords, date, time}) => wakeUpDumpIfNecessary(gtfs).then(() => {
     const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
     const stopPoints = nearestTo(coordinates, gtfs)
     const distanceKilometers = stopPoints[0] && haversine(coordinates,
         {lat: parseFloat(stopPoints[0].stop_lat), long: parseFloat(stopPoints[0].stop_lon)})
     res.set('Content-Type', 'application/json')
-    res.send({departures: asDeparturesData(timetable({gtfs, stopPoints, date})),
-        stationName: stopPoints[0].stop_name, date, time: '00:00:00', distanceKilometers})})
+    res.send({departures: asDeparturesData(timetable({gtfs, stopPoints,date, time})),
+        stationName: (stopPoints[0] || {}).stop_name || 'no station nearby', date, time, distanceKilometers})})
 
-app.get('/coords/:coords/date/:date/time/:time', ({params:{coords, date, time}}, res) => {
-    const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
-    const stopPoints = nearestTo(coordinates, gtfs)
-    const distanceKilometers = stopPoints[0] && haversine(coordinates,
-        {lat: parseFloat(stopPoints[0].stop_lat), long: parseFloat(stopPoints[0].stop_lon)})
-    res.set('Content-Type', 'application/json')
-    res.send({departures: asDeparturesData(timetable({gtfs, stopPoints, date, time})),
-        stationName: stopPoints[0].stop_name, date, time, distanceKilometers})})
+app.get('/coords/:coords', ({params:{coords}}, res) => workWith(
+    {res, gtfs, coords, date: moment().format('YYYYMMDD'), time: moment().format('HH:mm:ss')}))
+
+app.get('/coords/:coords/date/:date', ({params:{coords, date}}, res) => workWith(
+    {res, gtfs, coords, date, time: '00:00:00'}))
+
+app.get('/coords/:coords/date/:date/time/:time', ({params:{coords, date, time}}, res) => workWith(
+    {res, gtfs, coords, date, time}))
 
 app.get('/update', (options, res) => readDumps(sources).then(updatedGtfs => {
     const freshness = moment().format('YYYY-MM-DDTHH:mm:ss')
@@ -66,5 +61,5 @@ app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
 
-update().then(() => setInterval(update, 1500000))
+update().then(() => console.log('I am all set') && setInterval(update, 1500000))
 
