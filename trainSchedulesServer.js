@@ -12,6 +12,10 @@ const sources = [
 const gtfs = {}
 const app = express()
 
+const update = () => readDumps(sources)
+    .then(updatedGtfs => Object.assign(gtfs, updatedGtfs,
+            {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}))
+
 app.get('/coords/:coords', ({params:{coords}}, res) => {
     const coordinates = {lat: parseFloat(coords.split(',')[0]), long: parseFloat(coords.split(',')[1])}
     const stopPoints = nearestTo(coordinates, gtfs)
@@ -62,6 +66,5 @@ app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
 
-setInterval(() => readDumps(sources)
-    .then(updatedGtfs => Object.assign(gtfs, updatedGtfs,
-        {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')})), 3600000)
+update().then(() => setInterval(update, 3600000))
+
