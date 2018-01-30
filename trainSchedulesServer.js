@@ -66,5 +66,5 @@ app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
 
-update().then(() => setInterval(update, 3600000))
+update().then(() => setInterval(update, 1500000))
 
