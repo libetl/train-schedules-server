@@ -4,7 +4,7 @@
   "description": "",
   "main": "bin/trainSchedulesServer.js",
   "scripts": {
-    "postinstall": "node ./storeFallbackDump.js",
+    "storeFallbackDump": "node ./storeFallbackDump.js",
     "build": "webpack",
     "start": "node ./trainSchedulesServer.js"
   },
