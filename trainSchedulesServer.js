@@ -46,5 +46,7 @@ app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
 
-update(gtfs).then(() => console.log('I am all set') && setInterval(update, 1500000))
+update(gtfs).then(() => console.log('I am all set') &&
+    setInterval(() =>
+        get('https://train-schedules-server.herokuapp.com').then(() => update(gtfs)), 1500000))
 
