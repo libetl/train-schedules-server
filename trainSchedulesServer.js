@@ -16,7 +16,8 @@ const app = express()
 
 const update = () => readDumps(sources)
     .then(updatedGtfs => Object.assign(gtfs, updatedGtfs, {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}) &&
-        bfj.write('./savedGtfs.dump', gtfs))
+        bfj.write('./savedGtfs.dump.inprogress', gtfs))
+    .then(() => new Promise(resolve => fs.rename('./savedGtfs.dump.inprogress', './savedGtfs.dump', resolve)))
 
 const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(resolve =>
     fs.stat('./savedGtfs.dump', (err => err ? resolve({}) :
