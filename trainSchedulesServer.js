@@ -48,5 +48,5 @@ app.listen(app.get('port'), () => console.log(`Train schedule server on port ${a
 
 update(gtfs).then(() => console.log('I am all set') &&
     setInterval(() =>
-        get('https://train-schedules-server.herokuapp.com').then(() => update(gtfs)), 1500000))
+        get('https://train-schedules-server.herokuapp.com').then(() => update(gtfs)), 1000000))
 
