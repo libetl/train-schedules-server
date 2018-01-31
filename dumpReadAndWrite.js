@@ -13,6 +13,6 @@ const update = gtfs => updateWithoutWrite(gtfs)
 
 const wakeUpDumpIfNecessary = dump => dump.agency ? Promise.resolve({}) : new Promise(resolve =>
     fs.stat('./savedGtfs.dump', (err => console.log(err) && err ? resolve({}) :
-        fs.readFile('./savedGtfs.dump', 'utf8', (err, data) => resolve(Object.assign(dump, JSON.parse(data)))))))
+        bfj.read('./savedGtfs.dump').then(data => resolve(Object.assign(dump, data))))))
 
 module.exports = {updateWithoutWrite, update, wakeUpDumpIfNecessary}
