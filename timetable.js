@@ -35,8 +35,8 @@ const timetable = ({gtfs, coordinates, stopPoints = nearestTo(coordinates, gtfs)
             {date:(gtfs.calendar_dates[date]||[])[stopTimeTripRouteAgencyService.trip.service_id]}))
         .map(row => Object.assign(row, {stops:gtfs.stop_times_by_trip_id[row.stopTime.trip_id].map(stopTime =>
                 Object.assign({stopTime}, {stop: gtfs.stops[stopTime.stop_id]}))}))
-        .filter(row => (!row.service || (row.service.start_date.localeCompare(date) <= 0 &&
-            row.service.end_date.localeCompare(date) >= 0 && row.service[dayOfWeek] === '1')) &&
+        .filter(row => row.service && (row.service.start_date.localeCompare(date) <= 0 &&
+            row.service.end_date.localeCompare(date) >= 0 && row.service[dayOfWeek] === '1') &&
             (!row.date || row.date.exception_type !== '2') &&
             row.stopTime.arrival_time.localeCompare(time) >= 0)
         .sort((row1, row2) => row1.stopTime.arrival_time.localeCompare(row2.stopTime.arrival_time)))
