@@ -2,3 +2,6 @@
 bin
 yarn*
 node_modules
+savedGtfs.dump.inprogress
+savedGtfs.dump
+
