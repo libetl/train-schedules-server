@@ -19,9 +19,9 @@ const update = () => readDumps(sources)
         bfj.write('./savedGtfs.dump.inprogress', gtfs))
     .then(() => new Promise(resolve => fs.rename('./savedGtfs.dump.inprogress', './savedGtfs.dump', resolve)))
 
-const wakeUpDumpIfNecessary = gtfs => gtfs.agency ? Promise.resolve({}) : new Promise(resolve =>
-    fs.stat('./savedGtfs.dump', (err => err ? resolve({}) :
-        fs.readFile('./savedGtfs.dump', 'utf8', (err, data) => resolve(Object.assign(gtfs, JSON.parse(data)))))))
+const wakeUpDumpIfNecessary = dump => dump.agency ? Promise.resolve({}) : new Promise(resolve =>
+    fs.stat('./savedGtfs.dump', (err => console.log(err) && err ? resolve({}) :
+        fs.readFile('./savedGtfs.dump', 'utf8', (err, data) => resolve(Object.assign(dump, JSON.parse(data)))))))
 
 
 const workWith = ({res, gtfs, coords, date, time}) => wakeUpDumpIfNecessary(gtfs).then(() => {
