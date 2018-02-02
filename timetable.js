@@ -1,5 +1,6 @@
 const capitalize = require('./capitalize')
-const {distance} = require ('./distance')
+const {distance} = require('./distance')
+const haversine = require('./haversine')
 
 const computeDayOfWeek = (y, m, d) => {
     const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4]
@@ -43,7 +44,7 @@ const timetable = ({gtfs, coordinates, stopPoints = nearestTo(coordinates, gtfs)
     .reduce((acc, value) => acc.concat(value), [])
 
 const asDeparturesData = gtfsResult => gtfsResult.map(gtfsDeparture => ({
-    savedNumber: gtfsDeparture.trip.trip_id,
+    savedNumber: isNaN(gtfsDeparture.trip.trip_headsign) ? gtfsDeparture.trip.trip_id : parseInt(gtfsDeparture.trip.trip_headsign),
     stop_date_time: {
         base_departure_date_time: gtfsDeparture.stopTime.departure_time,
     },
@@ -52,8 +53,14 @@ const asDeparturesData = gtfsResult => gtfsResult.map(gtfsDeparture => ({
             gtfsDeparture.agency.agency_name.startsWith('Paris') ? 'Transilien' : gtfsDeparture.agency.agency_name,
         name: gtfsDeparture.route.route_short_name,
         number: gtfsDeparture.trip.trip_headsign,
-        direction: capitalize(gtfsDeparture.stops.slice(-1)[0].stop.stop_name),
+        direction: capitalize(gtfsDeparture.stops.slice(-1)[0].stop.stop_name).replace(/^Gare De /, ''),
         time: `${('' + (parseInt(gtfsDeparture.stopTime.departure_time.split(':')[0]) % 24)).padStart(2, '0')}:${gtfsDeparture.stopTime.departure_time.split(':')[1]}`,
-        stops: gtfsDeparture.stops.map(stopData => capitalize(stopData.stop.stop_name))}}))
+        stops: gtfsDeparture.stops.map(stopData => capitalize(stopData.stop.stop_name).replace(/^Gare De /, ''))}}))
 
-module.exports = {nearestTo, timetable, asDeparturesData}
+const withGeolocation = (stationCoords, departures, sncfMaps) =>
+    departures.map(departure =>  Object.assign(departure,
+        {dataToDisplay: Object.assign(departure.dataToDisplay,
+                {distance: sncfMaps[departure.savedNumber] &&
+                    `< ${Math.ceil(haversine(stationCoords, sncfMaps[departure.savedNumber]))} km`})}))
+
+module.exports = {nearestTo, timetable, asDeparturesData, withGeolocation}
