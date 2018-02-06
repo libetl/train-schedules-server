@@ -6,11 +6,11 @@ const geolocationUrl = 'http://www.sncf.com/fr/geolocalisation'
 const defaultHeaders = {headers:{Referer: geolocationUrl}}
 
 const read = (jnyL, prodL, remL, locL) => jnyL
-    .map(train => {return {...train, ...prodL[train.prodX], remarks:[...new Set(train.remL)].map(rem => {return {...rem, ...remL[rem.remX]}}),
-        lines:train.ani && [...new Set(train.ani.fLocX)].map(loc => locL[loc])}})
-    .map(train => {return {...train, names:train.remarks.filter(r => r.code = 'FD').map(r => r.txtN)}})
-    .map(train => {return {...train, number:(train.names.map(name => name.match(/\s*[0-9]+$/) && parseInt(name.match(/\s*([0-9]+)$/)[1])) || [])[0]}})
-    .map(train => {return {...train, coords:{lat:train.pos.y / 1E6, long:train.pos.x / 1E6}}})
+    .map(train => Object.assign(train, prodL[train.prodX], {remarks:Array.from(new Set(train.remL)).map(rem => Object.assign(rem, remL[rem.remX])),
+        lines:train.ani && Array.from(new Set(train.ani.fLocX)).map(loc => locL[loc])}))
+    .map(train => Object.assign(train, {names:train.remarks.filter(r => r.code = 'FD').map(r => r.txtN)}))
+    .map(train => Object.assign(train, {number:(train.names.map(name => name.match(/\s*[0-9]+$/) && parseInt(name.match(/\s*([0-9]+)$/)[1])) || [])[0]}))
+    .map(train => Object.assign(train, {coords:{lat:train.pos.y / 1E6, long:train.pos.x / 1E6}}))
 
 const realTimeTrains = () => get(`${sncfMapsPrefix}${moment().format('YYYYMMDD')}&time=${moment().format('HHmm00')}&tpm=REPORT_ONLY&its=CT|INTERNATIONAL,CT|TGV,CT|INTERCITE,CT|TER,CT|TRANSILIEN&un=true&livemapCallback=`, defaultHeaders)
     .then(({data:{svcResL:[{res:{common:{prodL,remL,locL},jnyL}}]}}) => read(jnyL, prodL, remL, locL))
