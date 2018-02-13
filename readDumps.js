@@ -1,5 +1,6 @@
 const {get} = require('axios')
 const unzip = require('yauzl')
+const fs = require('fs')
 const eventStream = require('event-stream')
 
 const keys = {
@@ -12,7 +13,7 @@ const keys = {
 }
 
 const filteredProperties = {
-    agency: ['agency_id', 'agency_name'],
+    agency: ['agency_id', 'agency_name', 'agency_timezone'],
     calendar: ['service_id', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday', 'start_date', 'end_date'],
     calendar_dates: ['service_id', 'date', 'exception_type'],
     routes: ['agency_id', 'route_id', 'route_long_name', 'route_short_name', 'text'],
@@ -71,8 +72,9 @@ const asStream = data => global.window ? new Buffer(new Uint8Array(data)) : data
 
 const urlToDataStructure = url => {
     let result = {}
-    return get(url, {responseType: 'arraybuffer'})
-        .then(({data}) => new Promise(resolve => unzip.fromBuffer(asStream(data), {lazyEntries: true},
+    return (url.startsWith('http') ? get(url, {responseType: 'arraybuffer'}).then(({data}) => asStream(data)) :
+        new Promise(resolve => fs.readFile(url, (err, data) => resolve(data))))
+        .then(buffer => new Promise(resolve => unzip.fromBuffer(buffer, {lazyEntries: true},
             (err, zipfile) => {
                 if (err) throw err
                 zipfile.readEntry()

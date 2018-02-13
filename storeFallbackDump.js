@@ -1,3 +1,3 @@
 const {update} = require('./dumpReadAndWrite')
 
-update({})
+update({}, process.argv.slice(2))
