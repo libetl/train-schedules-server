@@ -4,7 +4,7 @@ const haversine = require('./haversine')
 
 const computeDayOfWeek = (y, m, d) => {
     const t = [0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4]
-    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'friday', 'saturday']
+    const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
     const y1 = m < 3 ? y - 1 : y
     return days[(y1 + Math.trunc(y1/4) - Math.trunc(y1/100) + Math.trunc(y1/400) + t [m - 1] + d) % 7]
 }
