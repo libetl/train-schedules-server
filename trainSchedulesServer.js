@@ -41,13 +41,18 @@ app.get('/freshness', (options, res) => res.set('Content-Type', 'application/jso
     res.send({freshness: gtfs.freshness || 'no data read yet',
         links:{update: '/update'}}))
 
+app.get('/updateGeoloc', (options, res) => res.set('Content-Type', 'application/json') &&
+    sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)).then(() => res.send({status:'ok'})))
+
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({links:{update: '/update',
             freshness: '/freshness',
             nextDeparturesAndArrivals : '/coords/{lat},{long}',
             schedulesByDayAtStation : '/coords/{lat},{long}/date/{YYYYMMDD}',
             schedulesBetweenDateTimeAndMidnightAtStation :
-                '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}'}}))
+                '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}',
+            updateGeoloc :
+                '/updateGeoloc'}}))
 
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
