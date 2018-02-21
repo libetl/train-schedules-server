@@ -50,6 +50,7 @@ const asDeparturesData = gtfsResult => gtfsResult.map(gtfsDeparture => ({
     },
     dataToDisplay: {
         mode: gtfsDeparture.agency.agency_name.startsWith('RER') ? 'RER' :
+            gtfsDeparture.agency.agency_name.startsWith('La Verrière - La Défense') ? 'Transilien' :
             gtfsDeparture.agency.agency_name.startsWith('Paris') ? 'Transilien' : gtfsDeparture.agency.agency_name,
         name: gtfsDeparture.route.route_short_name,
         number: gtfsDeparture.trip.trip_headsign,
