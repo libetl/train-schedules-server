@@ -44,7 +44,10 @@ const timetable = ({gtfs, coordinates, stopPoints = nearestTo(coordinates, gtfs)
     .reduce((acc, value) => acc.concat(value), [])
 
 const asDeparturesData = gtfsResult => gtfsResult.map(gtfsDeparture => ({
-    savedNumber: isNaN(gtfsDeparture.trip.trip_headsign) ? gtfsDeparture.trip.trip_id : parseInt(gtfsDeparture.trip.trip_headsign),
+    savedNumber: (gtfsDeparture.trip.trip_id||'').startsWith('DUASN') ?
+        parseInt(gtfsDeparture.trip.trip_id.match(/^DUASN([0-9]+)/)[1]) :
+        isNaN(gtfsDeparture.trip.trip_headsign) ? gtfsDeparture.trip.trip_id :
+            parseInt(gtfsDeparture.trip.trip_headsign),
     stop_date_time: {
         base_departure_date_time: gtfsDeparture.stopTime.departure_time,
     },
