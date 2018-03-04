@@ -4,9 +4,11 @@ const haversine = require('./haversine')
 const {nearestTo, timetable, asDeparturesData, withGeolocation} = require('./timetable')
 const {updateWithoutWrite} = require('./dumpReadAndWrite')
 const {sncfMapsUpdate} = require('./sncfMaps')
+const {delays} = require('./navitiaDelays')
 
 const gtfs = {}
 const sncfMaps = {}
+const sncfApiDelays = {savedNumbers:{}, stopPoints:{}}
 const app = express()
 
 const workWith = ({res, gtfs, coords, date, time}) => {
@@ -17,7 +19,8 @@ const workWith = ({res, gtfs, coords, date, time}) => {
     const distanceKilometers = stopPoints.length && haversine(coordinates, stationCoords)
     res.set('Content-Type', 'application/json')
     res.send({departures:
-            withGeolocation(stationCoords, asDeparturesData(timetable({gtfs, stopPoints, date, time})), sncfMaps),
+            withGeolocation(stationCoords, asDeparturesData(
+                timetable({delays: sncfApiDelays, gtfs, stopPoints, date, time})), sncfMaps),
         stationName: (stopPoints[0] || {}).stop_name || 'no station nearby', date, time, distanceKilometers})}
 
 app.get('/coords/:coords', ({params:{coords}}, res) => workWith(
@@ -44,6 +47,9 @@ app.get('/freshness', (options, res) => res.set('Content-Type', 'application/jso
 app.get('/updateGeoloc', (options, res) => res.set('Content-Type', 'application/json') &&
     sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)).then(() => res.send({status:'ok'})))
 
+app.get('/updateDelays', (options, res) => res.set('Content-Type', 'application/json') &&
+    delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)).then(() => res.send({status:'ok'})))
+
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({links:{update: '/update',
             freshness: '/freshness',
@@ -51,6 +57,8 @@ app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
             schedulesByDayAtStation : '/coords/{lat},{long}/date/{YYYYMMDD}',
             schedulesBetweenDateTimeAndMidnightAtStation :
                 '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}',
+            updateDelays :
+                '/updateDelays',
             updateGeoloc :
                 '/updateGeoloc'}}))
 
@@ -63,4 +71,5 @@ updateWithoutWrite(gtfs)
     .then(() => console.log('I am all set'))
 
 setInterval(() => sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)), 60000)
+setInterval(() => delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)), 120000)
 
