@@ -48,7 +48,7 @@ app.get('/updateGeoloc', (options, res) => res.set('Content-Type', 'application/
     sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)).then(() => res.send({status:'ok'})))
 
 app.get('/updateDelays', (options, res) => res.set('Content-Type', 'application/json') &&
-    delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)).then(() => res.send({status:'ok'})))
+    res.send({status:'inprogress'}) && delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)))
 
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({links:{update: '/update',
