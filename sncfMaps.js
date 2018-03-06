@@ -1,7 +1,7 @@
 const {get} = require('axios')
 const moment = require('moment')
 
-const sncfMapsPrefix = `http://sncf-maps.hafas.de/carto/livemaps?service=journeygeopos&rect=-6870482,42935610,13168580,51453391&i=35000&is=10000&prod=27&date=`
+const sncfMapsPrefix = `http://sncf-maps.hafas.de/carto/livemaps?service=journeygeopos&rect=-6870482,42935610,13168580,51453391&i=350000&is=10000&prod=27&date=`
 const geolocationUrl = 'http://www.sncf.com/fr/geolocalisation'
 const defaultHeaders = {headers:{Referer: geolocationUrl}}
 
