@@ -50,16 +50,24 @@ app.get('/updateGeoloc', (options, res) => res.set('Content-Type', 'application/
 app.get('/updateDelays', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({status:'inprogress'}) && delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)))
 
+app.get('/delays', (options, res) => res.set('Content-Type', 'application/json') &&
+    res.send({sncfApiDelays, links:{update:'/updateDelays'}}))
+
+app.get('/geoloc', (options, res) => res.set('Content-Type', 'application/json') &&
+    res.send({sncfMaps, links:{update:'/updateGeoloc'}}))
+
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({links:{
             nextDeparturesAndArrivals : '/coords/{lat},{long}',
             schedulesByDayAtStation : '/coords/{lat},{long}/date/{YYYYMMDD}',
             schedulesBetweenDateTimeAndMidnightAtStation :
-                '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}',
-            /*update: '/update',
+                '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}'
+            /*,update: '/update',
             freshness: '/freshness',
+            delays : '/delays',
             updateDelays :
                 '/updateDelays',
+            geoloc : '/geoloc',
             updateGeoloc :
                 '/updateGeoloc'*/}}))
 
