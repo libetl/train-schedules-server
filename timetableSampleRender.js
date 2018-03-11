@@ -15,7 +15,7 @@ const time = '00:00:00'
 
 Promise.all([
     withMapsUpdate ? sncfMapsUpdate() : Promise.resolve({}),
-    withDelays ? delays() : Promise.resolve({})
+    withDelays ? delays() : Promise.resolve({stopPoints:{}, savedNumbers:{}})
     ]).then(([sncfMaps, delays]) =>
         console.log(JSON.stringify(
             withGeolocation(stationCoords,

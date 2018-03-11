@@ -51,16 +51,17 @@ app.get('/updateDelays', (options, res) => res.set('Content-Type', 'application/
     res.send({status:'inprogress'}) && delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)))
 
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
-    res.send({links:{update: '/update',
-            freshness: '/freshness',
+    res.send({links:{
             nextDeparturesAndArrivals : '/coords/{lat},{long}',
             schedulesByDayAtStation : '/coords/{lat},{long}/date/{YYYYMMDD}',
             schedulesBetweenDateTimeAndMidnightAtStation :
                 '/coords/{lat},{long}/date/{YYYYMMDD}/time/{HH}:{mm}:{ss}',
+            /*update: '/update',
+            freshness: '/freshness',
             updateDelays :
                 '/updateDelays',
             updateGeoloc :
-                '/updateGeoloc'}}))
+                '/updateGeoloc'*/}}))
 
 app.set('port', (process.env.PORT || 5000));
 app.listen(app.get('port'), () => console.log(`Train schedule server on port ${app.get('port')}`))
