@@ -7,7 +7,7 @@ const {sncfMapsUpdate} = require('./sncfMaps')
 const {delays} = require('./navitiaDelays')
 
 const gtfs = {}
-const sncfMaps = {}
+const geoloc = {sncfMaps:{}}
 const sncfApiDelays = {savedNumbers:{}, stopPoints:{}}
 const app = express()
 
@@ -20,7 +20,7 @@ const workWith = ({res, gtfs, coords, date, time}) => {
     res.set('Content-Type', 'application/json')
     res.send({departures:
             withGeolocation(stationCoords, asDeparturesData(
-                timetable({delays: sncfApiDelays, gtfs, stopPoints, date, time})), sncfMaps),
+                timetable({delays: sncfApiDelays, gtfs, stopPoints, date, time})), geoloc.sncfMaps),
         stationName: (stopPoints[0] || {}).stop_name || 'no station nearby', date, time, distanceKilometers})}
 
 app.get('/coords/:coords', ({params:{coords}}, res) => workWith(
@@ -45,7 +45,7 @@ app.get('/freshness', (options, res) => res.set('Content-Type', 'application/jso
         links:{update: '/update'}}))
 
 app.get('/updateGeoloc', (options, res) => res.set('Content-Type', 'application/json') &&
-    sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)).then(() => res.send({status:'ok'})))
+    sncfMapsUpdate().then(newMap => Object.assign(geoloc, {sncfMaps: newMap})).then(() => res.send({status:'ok'})))
 
 app.get('/updateDelays', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({status:'inprogress'}) && delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)))
@@ -54,7 +54,7 @@ app.get('/delays', (options, res) => res.set('Content-Type', 'application/json')
     res.send({sncfApiDelays, links:{update:'/updateDelays'}}))
 
 app.get('/geoloc', (options, res) => res.set('Content-Type', 'application/json') &&
-    res.send({sncfMaps, links:{update:'/updateGeoloc'}}))
+    res.send({sncfMaps: geoloc.sncfMaps, links:{update:'/updateGeoloc'}}))
 
 app.get('/', (options, res) => res.set('Content-Type', 'application/json') &&
     res.send({links:{
@@ -76,9 +76,9 @@ app.listen(app.get('port'), () => console.log(`Train schedule server on port ${a
 
 updateWithoutWrite(gtfs)
     .then(updatedGtfs => Object.assign(gtfs, updatedGtfs, {freshness: moment().format('YYYY-MM-DDTHH:mm:ss')}))
-    .then(() => sncfMapsUpdate()).then(newMap => Object.assign(sncfMaps, newMap))
+    .then(() => sncfMapsUpdate()).then(newMap => Object.assign(geoloc, {sncfMaps: newMap}))
     .then(() => console.log('I am all set'))
 
-setInterval(() => sncfMapsUpdate().then(newMap => Object.assign(sncfMaps, newMap)), 60000)
+setInterval(() => sncfMapsUpdate().then(newMap => Object.assign(geoloc, {sncfMaps: newMap})), 60000)
 setInterval(() => delays().then(foundDelays => Object.assign(sncfApiDelays, foundDelays)), 120000)
 
