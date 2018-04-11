@@ -2,6 +2,8 @@ const {get} = require('axios')
 const unzip = require('yauzl')
 const fs = require('fs')
 const eventStream = require('event-stream')
+const moment = require('moment')
+const retentionDays = 2
 
 const keys = {
     agency: ['agency_id'],
@@ -49,6 +51,9 @@ const nestData = (result, tableName, primaryKeyId, newValue) => {
 }
 
 const reduceArrays = entry => ({[entry[0]]: entry[1].reduce((acc, value) => {
+        if (Object.entries(value).length === 0){
+            return {}
+        }
         const propertyName = Object.entries(value)[0][0]
         const propertyValue = Object.entries(value)[0][1]
 
@@ -72,6 +77,7 @@ const asStream = data => global.window ? new Buffer(new Uint8Array(data)) : data
 
 const urlToDataStructure = url => {
     let result = {}
+    const neverAfter = moment().add(retentionDays, 'days').format('YYYYMMDD')
     return (url.startsWith('http') ? get(url, {responseType: 'arraybuffer'}).then(({data}) => asStream(data)) :
         new Promise(resolve => fs.readFile(url, (err, data) => resolve(data))))
         .then(buffer => new Promise(resolve => unzip.fromBuffer(buffer, {lazyEntries: true},
@@ -86,6 +92,9 @@ const urlToDataStructure = url => {
                             .pipe(eventStream.map((data, callback) => {
                                 const splitData = data.split(',').map(cell => cell.replace(/^['"](.*)['"]/, '$1'))
                                 const tableName = entry.fileName.replace('.txt', '')
+                                if (tableName === 'calendar_dates' && neverAfter.localeCompare(splitData[1]) < 0){
+                                    return result
+                                }
                                 const primaryKeyId = keys[tableName]
                                 const newValue = (result[entry.fileName] || []).map((label, i) => ({[label]: splitData[i]}))
                                     .reduce((acc, value) => filteredProperties[tableName].includes(Object.keys(value)[0]) ?
