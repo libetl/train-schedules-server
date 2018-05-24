@@ -18,6 +18,7 @@ const workWith = ({res, gtfs, coords, date, time}) => {
         {lat: parseFloat(stopPoints[0].stop_lat), long: parseFloat(stopPoints[0].stop_lon)}
     const distanceKilometers = stopPoints.length && haversine(coordinates, stationCoords)
     res.set('Content-Type', 'application/json')
+    res.set('Access-Control-Allow-Origin', '*')
     res.send({departures:
             withGeolocation(stationCoords, asDeparturesData(
                 timetable({delays: sncfApiDelays, gtfs, stopPoints, date, time})), geoloc.sncfMaps),
