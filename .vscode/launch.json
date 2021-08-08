@@ -1,0 +1,60 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach",
+            "port": 9229,
+            "request": "attach",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Clamart",
+            "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "args": [
+                "${workspaceFolder}/timetableSampleRender.js",
+                "48.813898",
+                "2.272531"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Write dump",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
+            "args": [
+                "${workspaceFolder}/storeFallbackDump.ts",
+                "https://ressources.data.sncf.com/explore/dataset/sncf-ter-gtfs/files/24e02fa969496e2caa5863a365c66ec2/download/",
+                "https://ressources.data.sncf.com/explore/dataset/sncf-intercites-gtfs/files/ed829c967a0da1252f02baaf684db32c/download/",
+                "https://ressources.data.sncf.com/explore/dataset/sncf-transilien-gtfs/files/f1a8e58126fbe2f67dd0512ef74a1124/download/",
+                "https://ressources.data.sncf.com/api/v2/catalog/datasets/horaires-des-train-voyages-tgvinouiouigo/files/538b55483fac4c1dad455022a0257014"
+            ]
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Write idf",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "program": "${workspaceFolder}/node_modules/ts-node/dist/bin.js",
+            "args": [
+                "${workspaceFolder}/storeFallbackDump.ts",
+                "https://ressources.data.sncf.com/explore/dataset/sncf-transilien-gtfs/files/f1a8e58126fbe2f67dd0512ef74a1124/download/",
+            ]
+        }
+    ]
+}

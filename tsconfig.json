@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "rootDir": ".",
+    "outDir": "bin",
+    "baseUrl": ".",
+    "checkJs": false,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "lib": ["ES2020"],
+    "module": "CommonJS",
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "target": "ES2020",
+    "typeRoots" : ["./node_modules/@types", "./typings"]
+  },
+  "include": ["typings/train-schedules-server/index.d.ts","src/*.ts", "scripts/*.ts"],
+  "compileOnSave": true
+}
